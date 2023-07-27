@@ -1,11 +1,13 @@
-import stripe from "stripe";
+// import stripe from "stripe";
 
-const instance = stripe(
-  "sk_test_51JpjA1DcfucCelYRTReEH8iyty3Qqff7lmx8XtyUDvIWGreNTqnqM9lJTbfKIIckhxt9Cr2Lom8rDNAI5h1Lvbku00JeQLJdBk"
-);
+// const instance = stripe(
+//   "sk_test_51JpjA1DcfucCelYRTReEH8iyty3Qqff7lmx8XtyUDvIWGreNTqnqM9lJTbfKIIckhxt9Cr2Lom8rDNAI5h1Lvbku00JeQLJdBk"
+// );
+import stripeSingleton from "../../../lib/stripe";
 
 export default async function (req, res) {
   return new Promise(async (resolve) => {
+    const instance = stripeSingleton.getStripeInstance();
     switch (req.method) {
       case "GET":
         try {
