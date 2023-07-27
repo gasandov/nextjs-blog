@@ -5,10 +5,31 @@ import { getSortedPostsData } from "../lib/posts";
 import Link from "next/link";
 import Date from "../components/date";
 import { useEffect, useState } from "react";
+import { set } from "date-fns";
 
 export default function Home({ allPostsData }) {
+  const [cx, setCx] = useState({});
+  const [value, setValue] = useState("");
   const [submit, setSubmit] = useState(false);
-  const [customer, setCustomer] = useState("");
+
+  const get = async () => {
+    const response = await fetch(`/api/stripe/customer?id=${value}`);
+    const customer = await response.json();
+    console.log("returned: ", customer);
+    setCx(customer);
+  };
+
+  const create = async () => {
+    const response = await fetch("/api/stripe/customer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const customer = await response.json();
+    console.log("created: ", customer);
+    setCx(customer);
+  };
 
   return (
     <Layout home>
@@ -39,47 +60,48 @@ export default function Home({ allPostsData }) {
       <input
         type="text"
         placeholder="customer"
-        value={customer}
-        onChange={(e) => setCustomer(e.target.value)}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
       />
-      <button onClick={() => setSubmit(true)}>do</button>
-      {submit && <Checkout id={customer} />}
+      <button onClick={get}>get</button>
+      <button onClick={create}>create</button>
+      <button
+        onClick={() => {
+          setCx("");
+          setValue("");
+          setSubmit(false);
+        }}
+      >
+        reset
+      </button>
+      <div>{JSON.stringify(cx)}</div>
     </Layout>
   );
 }
 
 function Checkout({ id }) {
-  useEffect(() => {
-    async function getCustomer() {
-      const response = await fetch(`/api/stripe/customer?id=${id}`);
-      return await response.json();
-    }
+  const [cx, setCx] = useState({});
 
-    async function createCustomer() {
-      const response = await fetch("/api/stripe/customer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      return await response.json();
-    }
+  const get = async () => {
+    const response = await fetch(`/api/stripe/customer?id=${id}`);
+    const customer = await response.json();
+    console.log("returned: ", customer);
+    setCx(customer);
+  };
 
-    async function process() {
-      try {
-        const cx = await getCustomer();
+  const create = async () => {
+    const response = await fetch("/api/stripe/customer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const customer = await response.json();
+    console.log("created: ", customer);
+    setCx(customer);
+  };
 
-        if (cx?.error) {
-          const cx = await createCustomer();
-          console.log("created: ", cx);
-        }
-      } catch (error) {}
-    }
-
-    process();
-  }, [id]);
-
-  return <div>hola</div>;
+  return <div>{JSON.stringify(cx)}</div>;
 }
 
 export async function getStaticProps() {
